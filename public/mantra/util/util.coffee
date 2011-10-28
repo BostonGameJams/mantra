@@ -1,5 +1,6 @@
 define [  
   'order!mantra/util/core'
+  'order!mantra/audio/audio'
   'order!mantra/util/asset_manager'
   'order!mantra/util/audio_manager'
   'order!mantra/util/canvas'

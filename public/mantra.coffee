@@ -16,7 +16,6 @@ define [
   # 'cs!../mantra/effects/bullet'
   # 'cs!../mantra/core/game'
   # 'cs!../mantra/controls/keyboard'
-  # 'cs!../mantra/config'
   # 'cs!../games/games'
 ], (jquery, jquery_hotkeys) ->
   # controller.attach view

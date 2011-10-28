@@ -15,8 +15,9 @@
       this.player_name = 'Player 1';
       EightByFive.__super__.constructor.call(this, _.defaults(this.options, {
         assets: {
+          root_path: '../games/8by5/',
           sounds: {
-            'bullet_shot': 'games/8by5/audio/simple_shot.mp3'
+            'bullet_shot': 'simple_shot.mp3'
           }
         },
         screens: {

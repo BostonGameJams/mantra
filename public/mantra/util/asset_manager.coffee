@@ -51,20 +51,25 @@ class AssetManager
   @playSound: (id) -> @asset_lookup[id].play()
 
   @downloadSounds: (callback) ->
-    return unless soundManager?
-    soundManager.onready =>
-      $logger.sound.info 'SoundManager ready'
+    if soundManager?
+      soundManager.onready =>
+        $logger.sound.info 'SoundManager ready'
+        @downloadSound sound.id, sound.path, callback for sound in @soundsQueue
+
+      soundManager.ontimeout ->
+        $logger.sound.error 'SM2 did not start'
+    else if @config.engine == 'buzz'
+      $logger.sound.info 'Flying with buzz'
       @downloadSound sound.id, sound.path, callback for sound in @soundsQueue
 
-    soundManager.ontimeout ->
-      $logger.sound.error 'SM2 did not start'
-
   @downloadSound: (id, path, callback) ->
-    manager = @
-    @cache[path] = soundManager.createSound
+    manager = @;
+    # @cache[path] = soundManager.createSound
+    @cache[path] = Mantra.AudioEngine.createSound
       id: id,
       autoLoad: true,
       url: path,
+      callback: callback,
       onload: ->
         $logger.assets.info this.url + "#{@url} is loaded"
         manager.successCount += 1
@@ -76,11 +81,15 @@ class AssetManager
       @play()
     @asset_lookup[id] = @cache[path]
 
-  @configureSoundManager: (asset_path) ->
-    soundManager.url                   = asset_path
-    soundManager.flashVersion          = 9
-    soundManager.debugFlash            = false
-    soundManager.debugMode             = false
-    soundManager.defaultOptions.volume = 15
+  @configureSoundManager: (@config = {}) ->
+    # $logger.assets.info "Configuring sound manager to use '#{@config.engine}' as the engine"
+    if @config.engine == 'buzz'
+      Mantra.AudioEngine.use 'buzz'
+    else if @config.engine == 'soundmanager'
+      soundManager.url                   = config.asset_path
+      soundManager.flashVersion          = 9
+      soundManager.debugFlash            = false
+      soundManager.debugMode             = false
+      soundManager.defaultOptions.volume = 15
 
 root.AssetManager = AssetManager

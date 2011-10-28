@@ -81,12 +81,24 @@
       return this.asset_lookup[id].play();
     };
     AssetManager.downloadSounds = function(callback) {
-      if (typeof soundManager === "undefined" || soundManager === null) {
-        return;
-      }
-      soundManager.onready(__bind(function() {
-        var sound, _i, _len, _ref, _results;
-        $logger.sound.info('SoundManager ready');
+      var sound, _i, _len, _ref, _results;
+      if (typeof soundManager !== "undefined" && soundManager !== null) {
+        soundManager.onready(__bind(function() {
+          var sound, _i, _len, _ref, _results;
+          $logger.sound.info('SoundManager ready');
+          _ref = this.soundsQueue;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            sound = _ref[_i];
+            _results.push(this.downloadSound(sound.id, sound.path, callback));
+          }
+          return _results;
+        }, this));
+        return soundManager.ontimeout(function() {
+          return $logger.sound.error('SM2 did not start');
+        });
+      } else if (this.config.engine === 'buzz') {
+        $logger.sound.info('Flying with buzz');
         _ref = this.soundsQueue;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -94,18 +106,16 @@
           _results.push(this.downloadSound(sound.id, sound.path, callback));
         }
         return _results;
-      }, this));
-      return soundManager.ontimeout(function() {
-        return $logger.sound.error('SM2 did not start');
-      });
+      }
     };
     AssetManager.downloadSound = function(id, path, callback) {
       var manager;
       manager = this;
-      this.cache[path] = soundManager.createSound({
+      this.cache[path] = Mantra.AudioEngine.createSound({
         id: id,
         autoLoad: true,
         url: path,
+        callback: callback,
         onload: function() {
           $logger.assets.info(this.url + ("" + this.url + " is loaded"));
           manager.successCount += 1;
@@ -122,12 +132,17 @@
       };
       return this.asset_lookup[id] = this.cache[path];
     };
-    AssetManager.configureSoundManager = function(asset_path) {
-      soundManager.url = asset_path;
-      soundManager.flashVersion = 9;
-      soundManager.debugFlash = false;
-      soundManager.debugMode = false;
-      return soundManager.defaultOptions.volume = 15;
+    AssetManager.configureSoundManager = function(config) {
+      this.config = config != null ? config : {};
+      if (this.config.engine === 'buzz') {
+        return Mantra.AudioEngine.use('buzz');
+      } else if (this.config.engine === 'soundmanager') {
+        soundManager.url = config.asset_path;
+        soundManager.flashVersion = 9;
+        soundManager.debugFlash = false;
+        soundManager.debugMode = false;
+        return soundManager.defaultOptions.volume = 15;
+      }
     };
     return AssetManager;
   })();

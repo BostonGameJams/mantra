@@ -26,6 +26,17 @@
       };
       this.configureEngine();
       console.log('Initializing game...');
+      if (typeof soundManager !== "undefined" && soundManager !== null) {
+        AssetManager.configureSoundManager({
+          engine: 'soundmanager',
+          asset_path: root.asset_path
+        });
+      } else {
+        AssetManager.configureSoundManager({
+          engine: 'buzz',
+          asset_path: root.asset_path
+        });
+      }
       $logger.assets.debug("# assets: " + assets.images.length);
       Mantra.KeyManager.capture_keypresses(this.game);
       this.game.init();
